@@ -8,6 +8,9 @@ const app = express();
 // Basic Configuration
 const port = process.env.PORT || 3000;
 
+const urlMap = {};
+let idCounter = 1;
+
 app.use(cors());
 
 app.use('/public', express.static(`${process.cwd()}/public`));
@@ -37,7 +40,6 @@ app.post('/api/shorturl', function(req, res) {
   try {
     const urlObj = new URL(originalUrl);
     if (urlObj.protocol !== "https:" && urlObj.protocol !== "http:") {
-      console.log("I got here");
       return res.json({error: 'invalid url'});
     }
   // assign hostname the name after successfully parsing the protocol
@@ -52,13 +54,12 @@ app.post('/api/shorturl', function(req, res) {
   dns.setServers(['8.8.8.8', '1.1.1.1']); // Google + Cloudflare
   dns.resolve4(hostname,(err, address) => {
     if (err) {
-      console.log(err, address);
       return res.json({error: 'invalid url'});
     }
 
     // shortened url logic goes here
-    const shortUrl = Math.floor(Math.random() * 1000);
-
+    const shortUrl = idCounter++;
+    urlMap[shortUrl] = originalUrl;
 
 
     return res.json({ original_url: originalUrl , short_url: shortUrl});
@@ -66,6 +67,12 @@ app.post('/api/shorturl', function(req, res) {
 );
 });
 
+
+app.get('/api/shorturl/:id', (req, res) => {
+    const original = urlMap[req.params.id];
+    if (original) return res.redirect(original)
+    res.json({error: 'no short url found in key'});
+})
 
 app.listen(port, function() {
   console.log(`Listening on port ${port}`);
