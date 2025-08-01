@@ -4,6 +4,39 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const dns = require('dns');
 const app = express();
+const {MongoClient, ServerApiVersion} = require('mongodb')
+let dbPass = process.env.MONGODB_PASS;
+const uri = "mongodb+srv://lsanch78:"+ dbPass + "@cluster0.ovob0h1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+
+
+const urlSchema = new mongoose.Schema({
+    original_url: {type: String, required: true},
+    name: {type: Number, unique: true},
+})
+
+const Url = mongoose.model('Url', urlSchema);
+
+const client = new MongoClient(uri, {
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
+});
+
+async function run() {
+    try {
+        // Connect the client to the server	(optional starting in v4.7)
+        await client.connect();
+        // Send a ping to confirm a successful connection
+        await client.db("admin").command({ ping: 1 });
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    } finally {
+        // Ensures that the client will close when you finish/error
+        await client.close();
+    }
+}
+run().catch(console.dir);
 
 // Basic Configuration
 const port = process.env.PORT || 3000;
