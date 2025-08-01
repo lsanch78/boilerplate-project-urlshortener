@@ -5,13 +5,16 @@ const bodyParser = require('body-parser');
 const dns = require('dns');
 const app = express();
 const {MongoClient, ServerApiVersion} = require('mongodb')
+const mongoose = require('mongoose');
+
+// MONGO DB Set up
 let dbPass = process.env.MONGODB_PASS;
 const uri = "mongodb+srv://lsanch78:"+ dbPass + "@cluster0.ovob0h1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 
-
+// Url Schema Definition
 const urlSchema = new mongoose.Schema({
     original_url: {type: String, required: true},
-    name: {type: Number, unique: true},
+    short_url: {type: Number, unique: true},
 })
 
 const Url = mongoose.model('Url', urlSchema);
